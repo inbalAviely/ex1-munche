@@ -1,16 +1,19 @@
 import json
 import csv
-import math
 import sys
-f = open(sys.argv[1],'r')
-data = json.loads(f.read())
+
+
+building = open(sys.argv[1],'r')
+data = json.loads(building.read())
+
+call = open(sys.argv[2])
+csv_reader = csv.reader(call)
+content = call.readlines()
+
+out = csv.reader(open(sys.argv[2]))
+lines = list(out)
+
 num_of_elv=len(data[ "_elevators"])
-print("num_of_elv"+str(num_of_elv))
-file = open(sys.argv[2])
-csv_reader = csv.reader(file)
-content = file.readlines()
-a = content[0]
-arr = a.split(',')
 
 class Elev:
 
@@ -52,73 +55,13 @@ class Call:
         else:
             return -1
 
-def findElv(c):
-    mindis=-1
-    minStops=-1
-
-    while(c.elv==-1):
-        for e in el:
-            i= findCurFloor(e,c)
-            if(i==-1 or e.arrStop[i].status==0):
-                if mindis==-1:
-                    mindis=findDis(e,i,c)
-                    c.elv=e
-                else:
-                    if mindis>findDis(e,i,c):
-                        mindis=findDis(e,i,c)
-                        c.elv = e
-            else:
-                if c.dir()==e.arrStop[i].status:
-                    if (e.arrStop[i].floor<c.src and c.src<e.arrStop[i+1])or (e.arrStop[i].floor>c.src and c.src>e.arrStop[i+1]):
-                        if minStops==-1:
-                            minStops=len(e.arrStop)-i
-                            c.elv=e
-                        else:
-                            if minStops<len(e.arrStop)-i:
-                                minStops = len(e.arrStop) - i
-                                c.elv = e
-        c.time+=100
-    addStop(c,c.elv)
-
-
-el = []
-k = 0
-for i in range(num_of_elv):
-    id = k
-    speed = data['_elevators'][i]['_speed']
-    closeTime = data['_elevators'][i]['_closeTime']
-    openTime = data['_elevators'][i]['_openTime']
-    startTime = data['_elevators'][i]['_startTime']
-    stopTime = data['_elevators'][i]['_stopTime']
-    min = data['_elevators'][i]['_minFloor']
-    max = data['_elevators'][i]['_maxFloor']
-    k+=1
-
-    el.append(i)
-    el[i] = Elev(id, speed,closeTime,openTime,startTime,stopTime,min,max)
-
-calls = []
-for i in range(len(content)):
-    temp = content[i].split(',')
-    print(content[i])
-    id = i
-    time = temp[1]
-    src = temp[2]
-    tar = temp[3]
-    calls.append(i)
-    calls[i] = Call(id, time, src,tar)
-
-    print(calls[i].id)
-print("end calls[i].id")
-
-
 
 def findCurFloor(e,c):
     i=len(e.arrStop)-1
     if i==-1:
         return -1
-    if i==-1:
-        while( e.arrStop[i].time>c.time):
+    else:
+        while( e.arrStop[i].time>c.time and i >= 0):
             i-=1
     return i
 
@@ -160,14 +103,70 @@ def clcTime(e,floorA,floorB):
     df=abs(floorA-floorB)
     return e.closeTime + e.startTime + df/e.speed + e.stopTime + e.openTime
 
-r = csv.reader(open(sys.argv[2]))
-lines = list(r)
+def findElv(c):
+    mindis=-1
+    minStops=-1
+
+    while(c.elv==-1):
+        for e in el:
+            i= findCurFloor(e,c)
+            if(i==-1 or e.arrStop[i].status==0):
+                if mindis==-1:
+                    mindis=findDis(e,i,c)
+                    c.elv=e
+                else:
+                    if mindis>findDis(e,i,c):
+                        mindis=findDis(e,i,c)
+                        c.elv = e
+            else:
+                if c.dir()==e.arrStop[i].status:
+                    if (e.arrStop[i].floor<c.src and c.src<e.arrStop[i+1])or (e.arrStop[i].floor>c.src and c.src>e.arrStop[i+1]):
+                        if minStops==-1:
+                            minStops=len(e.arrStop)-i
+                            c.elv=e
+                        else:
+                            if minStops<len(e.arrStop)-i:
+                                minStops = len(e.arrStop) - i
+                                c.elv = e
+        c.time+=5
+    addStop(c,c.elv)
+
+
+el = []
+k = 0
+for i in range(num_of_elv):
+    id = k
+    speed = data['_elevators'][i]['_speed']
+    closeTime = data['_elevators'][i]['_closeTime']
+    openTime = data['_elevators'][i]['_openTime']
+    startTime = data['_elevators'][i]['_startTime']
+    stopTime = data['_elevators'][i]['_stopTime']
+    min = data['_elevators'][i]['_minFloor']
+    max = data['_elevators'][i]['_maxFloor']
+    k+=1
+
+    el.append(i)
+    el[i] = Elev(id, speed,closeTime,openTime,startTime,stopTime,min,max)
+
+calls = []
+for i in range(len(content)):
+    temp = content[i].split(',')
+    id = i
+    time = temp[1]
+    src = temp[2]
+    tar = temp[3]
+    calls.append(i)
+    calls[i] = Call(id, time, src,tar)
+
 
 for i in calls:
     findElv(i)
     lines[i.id][5] = str(i.elv.id)
-print("end i.ic")
+
 writer = csv.writer(open(sys.argv[3], 'w',newline=''))
 writer.writerows(lines)
-f.close()
-file.close()
+
+
+
+
+

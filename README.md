@@ -7,10 +7,11 @@ https://blog.birost.com/a?ID=00450-d7c47455-0bd9-42bd-bd9d-d790532c1010
 https://en.wikipedia.org/wiki/Elevator_algorithm
 
 off-line algorithm
-
-count: read all the calls and divied them to up and down.
- devide the calls to two groups of ups and down.
- define dev_up = all calls/group calls_up,dev_down = all calls/group calls_down.
- el_up =  total elevators*dev_up,el_down = total elevators*dev_down.
- num_call_elv_up=calls_up/el_up,num_call_elv_down = calls_down/el_down.
-  
+we declare for each elevator an array that contain 
+all the floor it needs to stop and when it needs to stop their.
+we go over the calls and for each call we look where is the elevator
+ in that moment and in what direction it goes.
+ then we find thee closest elevator in rest and if all the elevator are not in rest
+  we look for the elevator in the same direction of the call that have the least calls.
+  if there is no elevator that answer this condition we add 5 seconds to the call and look again.
+  after we find the elevator we add the call to array of the elevator.
